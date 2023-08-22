@@ -72,8 +72,8 @@ jobs:
         uses: docker/build-push-action@v4
         timeout-minutes: 720
         with:
-          context: ./docker/isc/kea
-          file: ./docker/isc/kea/dockerfile
+          context: ./docker/kea
+          file: ./docker/kea/dockerfile
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
