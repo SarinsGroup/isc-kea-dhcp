@@ -2,6 +2,7 @@ version: "3.8"
 
 services:
   pgsql:
+    container_name: postgres
     image: postgres
     restart: always
     environment:
@@ -10,6 +11,7 @@ services:
       POSTGRES_DB: keadb
 
   mariadb:
+    container_name: mariadb
     image: mariadb
     restart: always
     environment:
@@ -19,6 +21,7 @@ services:
       MARIADB_PASSWOR: P@aaw0rd
 
   adminer:
+    container_name: GUI
     image: adminer
     restart: always
     ports:
@@ -27,32 +30,38 @@ services:
   isckeadhcp4:
     image: sarinsgroup/isc-kea-dhcp
     container_name: dhcp4
+    ports:
+      - 67:67/tcp
+      - 67:67/udp
     depends_on:
       - mariadb
     environment:
       - KEA_SERVICE=dhcp4
     volumes:
       - ./kea-dhcp4.conf:/etc/kea/kea-dhcp4.conf
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-      args:
-        - BRANCH=Kea-2.4.0
+    # build:
+    #   context: .
+    #   dockerfile: ./Dockerfile
+    #   args:
+    #     - BRANCH=Kea-2.4.0
 
   isckeadhcp6:
     image: sarinsgroup/isc-kea-dhcp
     container_name: dhcp6
+    ports:
+      - 567:567/tcp
+      - 567:567/udp
     depends_on:
       - mariadb
     environment:
       - KEA_SERVICE=dhcp6
     volumes:
       - ./kea-dhcp6.conf:/etc/kea/kea-dhcp6.conf
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-      args:
-        - BRANCH=Kea-2.4.0
+    # build:
+    #   context: .
+    #   dockerfile: ./Dockerfile
+    #   args:
+    #     - BRANCH=Kea-2.4.0
 
   isckeaddns:
     image: sarinsgroup/isc-kea-dhcp
@@ -63,23 +72,25 @@ services:
       - KEA_SERVICE=dhcp-ddns
     volumes:
       - ./kea-dhcp-ddns.conf:/etc/kea/kea-dhcp-ddns.conf
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-      args:
-        - BRANCH=Kea-2.4.0
+    # build:
+    #   context: .
+    #   dockerfile: ./Dockerfile
+    #   args:
+    #     - BRANCH=Kea-2.4.0
 
   isckeactrlagent:
     image: sarinsgroup/isc-kea-dhcp
     container_name: ctrl-agent
+    ports:
+      - 8080:8000
     depends_on:
       - mariadb
     environment:
       - KEA_SERVICE=ctrl-agent
     volumes:
       - ./kea-ctrl-agent.conf:/etc/kea/kea-ctrl-agent.conf
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-      args:
-        - BRANCH=Kea-2.4.0
+    # build:
+    #   context: .
+    #   dockerfile: ./Dockerfile
+    #   args:
+    #     - BRANCH=Kea-2.4.0
