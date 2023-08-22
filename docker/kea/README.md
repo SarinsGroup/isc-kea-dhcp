@@ -4,11 +4,13 @@ Kea is the next generation of DHCP software, developed by Internet Systems Conso
 
 Kea has following services
 
-1. Standard features from previous DHCP for both IP v4 & v6
-2. High Availability
-3. Dynamic DNS updates
-4. Host reservations
-5. REST Api
+1. Standard features
+    - DHCP4
+    - DHCP6
+    - High Availability
+    - Dynamic DNS updates
+   - Host reservations
+1. REST Api
 
 > Please follow this article that explains how to setup Kea for a [Small Office or Home Use](https://kb.isc.org/docs/kea-configuration-for-small-office-or-home-use)
 
@@ -35,7 +37,7 @@ Due to image size and vulnerabilities, this is alpine based solution.
 
 #### Example: 
 ```
-docker run -d --name dhcp4 -e "KEA_SERVICE=dhcp4" -v "./kea-dhcp4.conf:/etc/kea/kea-dhcp4.conf" sarinsgroup/isc-kea-dhcp
+docker run -d --name dhcp4 -e "KEA_SERVICE=dhcp4" -v "./kea-dhcp4.conf:/etc/kea/kea-dhcp4.conf" sarinsgroup/isc-kea-dhcp:stable
 ```
 
 ### docker-compose.yml
@@ -80,14 +82,14 @@ services:
 
 ## Configuraions
 
-Very basic configurations can be copied from 
+### Basic configurations samples can be downloaded from
 
 - dhcp4 - https://raw.githubusercontent.com/SarinsGroup/isc-kea-dhcp/main/docker/kea/kea-dhcp4.conf
 - dhcp6 - https://raw.githubusercontent.com/SarinsGroup/isc-kea-dhcp/main/docker/kea/kea-dhcp6.conf
 - dhcp-ddns - https://raw.githubusercontent.com/SarinsGroup/isc-kea-dhcp/main/docker/kea/kea-dhcp-ddns.conf
 - ctrl-agent - https://raw.githubusercontent.com/SarinsGroup/isc-kea-dhcp/main/docker/kea/kea-ctrl-agent.conf
 
-For advance configurations refer
+### For advance configurations refer
 
 - dhcp4 - https://kea.readthedocs.io/en/latest/arm/dhcp4-srv.html#dhcpv4-server-configuration
 - dhcp6 - https://kea.readthedocs.io/en/latest/arm/dhcp6-srv.html#dhcpv6-server-configuration
