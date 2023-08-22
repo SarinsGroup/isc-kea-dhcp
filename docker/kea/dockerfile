@@ -1,0 +1,63 @@
+# ---------------------------------------------------------------------------------------
+# This stage will buld our base image, based on which all other images willl be built.
+# ---------------------------------------------------------------------------------------
+FROM --platform=$BUILDPLATFORM alpine as alpine-base
+
+RUN set -e
+RUN apk add --update --no-cache procps file
+
+ENV TZ="America/NEW_YORK"
+
+# ---------------------------------------------------------------------------------------
+# This stage will build all required packages
+# References: 
+# - https://kea.readthedocs.io/en/latest/index.html
+# - https://reports.kea.isc.org/dev_guide/de/d9a/crossCompile.html
+# - https://gitlab.isc.org/isc-projects/kea/-/blob/master/.github/workflows/codeql.yml
+# - https://kea.readthedocs.io/en/latest/arm/install.html#configure-before-the-build
+# - https://kea.readthedocs.io/en/latest/arm/install.html#build-requirements
+# - https://www.gnu.org/software/automake/manual/automake.html#Standard-Targets
+# ---------------------------------------------------------------------------------------
+FROM alpine-base as build
+
+ARG BRANCH="Kea-2.4.0"
+
+# added Sysrepo libyang googletest
+RUN apk add --no-cache curl gnupg git ca-certificates g++ \
+    boost-dev openssl-dev log4cplus-dev mysql-dev postgresql-dev krb5-dev freeradius-dev \
+    make autoconf automake libtool     
+
+RUN git clone -b ${BRANCH}  https://gitlab.isc.org/isc-projects/kea.git
+
+WORKDIR /kea
+
+RUN autoreconf --install
+RUN ./configure --with-openssl --with-mysql --with-pgsql --enable-perfdhcp --with-freeradius
+RUN make
+RUN make install-strip
+
+# These are built artifacts that are not required to run the services
+RUN rm /usr/local/lib/libkea-*.la
+RUN rm /usr/local/lib/libkea-*.a
+RUN rm /usr/local/lib/kea/hooks/libdhcp_*.la
+RUN rm /usr/local/lib/kea/hooks/libdhcp_*.a
+
+# ---------------------------------------------------------------------------------------
+# Base for separate images for each service dhcp4, dhcp6, ddns and ctrl-agent.
+# It’s best practice to separate areas of concern by using one service per container.
+# This can be overriden to start all the service in one container as descibed in https://docs.docker.com/config/containers/multi-service_container/
+# ---------------------------------------------------------------------------------------
+FROM alpine-base
+EXPOSE 67
+RUN apk add --no-cache libgcc libstdc++ libpq log4cplus mariadb-connector-c freeradius-client
+RUN mkdir -p /etc/kea /run/kea/ /usr/local/var/lib/kea/ /usr/local/var/run/kea /usr/local/lib/kea/hooks/
+RUN touch /usr/local/var/lib/kea/kea-leases4.csv
+
+COPY --from=build /usr/local/lib/ /usr/local/lib/
+COPY --from=build /usr/local/sbin /usr/local/sbin/
+
+ENV KEA_SERVICE="dhcp4"
+
+COPY entrypoint.sh /
+
+ENTRYPOINT [ "/entrypoint.sh" ]

@@ -1,0 +1,95 @@
+name: Kea Docker Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        branch:
+          - "Kea-2.4.0"
+          - "Kea-2.3.8"
+          - "Kea-2.3.7"
+        include:
+          - branch: master
+          - branch: Kea-2.5.0
+            type: latest
+          - branch: Kea-2.4.0
+            type: stable
+          
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Get Kea Version missing stable tag
+      - name: Get kea version
+        id: version
+        run: |
+          echo "KEA_VERSION=$(curl --silent https://gitlab.isc.org/isc-projects/kea/-/raw/${{ matrix.branch }}/configure.ac | grep "AC_INIT(kea," | grep -Eo '[0-9]\.[0-9]\.[0-9]+')" >> "$GITHUB_OUTPUT"
+
+      # Setup Buildx to generate manifests
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Login to Github packages
+      - name: Login with Github Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.PACKAGE_TOKEN }}
+
+      # Login to docker hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      # Extract Metadata for versioning
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}
+            ${{ secrets.DOCKER_USERNAME }}/isc-kea-dhcp
+          tags: |
+            type=raw,value=${{ matrix.type }}
+            type=raw,value=${{ steps.version.outputs.KEA_VERSION }}
+
+      # Build and Push Images to Docker and GitHub Packages
+      # TODO: replace it with private registry with oci repo
+      - name: Build and push images
+        id: build
+        uses: docker/build-push-action@v4
+        timeout-minutes: 720
+        with:
+          context: ./docker/isc/kea
+          file: ./docker/isc/kea/dockerfile
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          build-args: |
+            BRANCH_VERSION=${{ matrix.branch }}
+            maintainer=Sarins Group
+            org.opencontainers.image.description=ISC Kea DHCP Server
+            org.opencontainers.image.vendor=Sarins Group
+            org.opencontainers.image.license=MIT
+
+      # Push readme to docker hub
+      - name: Docker Hub Description
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          repository: ${{ github.repository }}
+          readme-filepath: ./docker/kea/README.md

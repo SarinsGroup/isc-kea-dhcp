@@ -1,0 +1,85 @@
+version: "3.8"
+
+services:
+  pgsql:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: keaadmin
+      POSTGRES_PASSWORD: P@ssw0rd
+      POSTGRES_DB: keadb
+
+  mariadb:
+    image: mariadb
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: P@ssw0rd
+      MARIADB_DATABASE: keadb
+      MARIADB_USER: keaadmin
+      MARIADB_PASSWOR: P@aaw0rd
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8089:8080
+
+  isckeadhcp4:
+    image: sarinsgroup/isc-kea-dhcp
+    container_name: dhcp4
+    depends_on:
+      - mariadb
+    environment:
+      - KEA_SERVICE=dhcp4
+    volumes:
+      - ./kea-dhcp4.conf:/etc/kea/kea-dhcp4.conf
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        - BRANCH=Kea-2.4.0
+
+  isckeadhcp6:
+    image: sarinsgroup/isc-kea-dhcp
+    container_name: dhcp6
+    depends_on:
+      - mariadb
+    environment:
+      - KEA_SERVICE=dhcp6
+    volumes:
+      - ./kea-dhcp6.conf:/etc/kea/kea-dhcp6.conf
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        - BRANCH=Kea-2.4.0
+
+  isckeaddns:
+    image: sarinsgroup/isc-kea-dhcp
+    container_name: dhcp-ddns
+    depends_on:
+      - mariadb
+    environment:
+      - KEA_SERVICE=dhcp-ddns
+    volumes:
+      - ./kea-dhcp-ddns.conf:/etc/kea/kea-dhcp-ddns.conf
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        - BRANCH=Kea-2.4.0
+
+  isckeactrlagent:
+    image: sarinsgroup/isc-kea-dhcp
+    container_name: ctrl-agent
+    depends_on:
+      - mariadb
+    environment:
+      - KEA_SERVICE=ctrl-agent
+    volumes:
+      - ./kea-ctrl-agent.conf:/etc/kea/kea-ctrl-agent.conf
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        - BRANCH=Kea-2.4.0
