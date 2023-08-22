@@ -86,10 +86,10 @@ jobs:
             org.opencontainers.image.license=MIT
 
       # Push readme to docker hub
-      - name: Docker Hub Description
-        uses: peter-evans/dockerhub-description@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-          repository: ${{ github.repository }}
-          readme-filepath: ./docker/kea/README.md
+      #- name: Docker Hub Description
+      #  uses: peter-evans/dockerhub-description@v3
+      #  with:
+      #    username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #    password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      #    repository: ${{ github.repository }}
+      #    readme-filepath: ./docker/kea/README.md
