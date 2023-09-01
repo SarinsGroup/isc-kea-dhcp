@@ -32,7 +32,9 @@ RUN git clone -b ${BRANCH}  https://gitlab.isc.org/isc-projects/kea.git
 WORKDIR /kea
 
 RUN autoreconf --install
-RUN ./configure --with-openssl --with-mysql --with-pgsql --enable-perfdhcp --with-freeradius
+
+RUN ./configure --with-openssl --with-mysql --with-pgsql --enable-perfdhcp --with-freeradius --with-gssapi
+
 RUN make
 RUN make install-strip
 
@@ -49,10 +51,17 @@ RUN rm /usr/local/lib/kea/hooks/libdhcp_*.a
 # ---------------------------------------------------------------------------------------
 FROM alpine-base
 EXPOSE 67
+EXPOSE 67/udp
+EXPOSE 547
+EXPOSE 547/udp
+EXPOSE 8000
+
 RUN apk add --no-cache libgcc libstdc++ libpq log4cplus mariadb-connector-c freeradius-client
 RUN mkdir -p /etc/kea /run/kea/ /usr/local/var/lib/kea/ /usr/local/var/run/kea /usr/local/lib/kea/hooks/
 RUN touch /usr/local/var/lib/kea/kea-leases4.csv
 
+
+COPY --from=build /usr/local/etc/kea/ /etc/kea/
 COPY --from=build /usr/local/lib/ /usr/local/lib/
 COPY --from=build /usr/local/sbin /usr/local/sbin/
 

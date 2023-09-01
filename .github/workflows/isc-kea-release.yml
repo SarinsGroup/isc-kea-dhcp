@@ -10,16 +10,18 @@ jobs:
     strategy:
       matrix:
         branch:
-          - "Kea-2.4.0"
-          - "Kea-2.3.8"
           - "Kea-2.3.7"
+          - "Kea-2.3.8"          
+          - "Kea-2.5.0"
+          - "master"
+          - "Kea-2.4.0"
         include:
           - branch: master
           - branch: Kea-2.5.0
             type: latest
           - branch: Kea-2.4.0
             type: stable
-          
+
     permissions:
       packages: write
       contents: read
@@ -76,7 +78,7 @@ jobs:
           file: ./docker/kea/dockerfile
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6,linux/i386
           push: true
           build-args: |
             BRANCH_VERSION=${{ matrix.branch }}
@@ -86,10 +88,10 @@ jobs:
             org.opencontainers.image.license=MIT
 
       # Push readme to docker hub
-      - name: Docker Hub Description
-        uses: peter-evans/dockerhub-description@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-          repository: ${{ github.repository }}
-          readme-filepath: ./docker/kea/README.md
+      #- name: Docker Hub Description
+      #  uses: peter-evans/dockerhub-description@v3
+      #  with:
+      #    username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #    password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      #    repository: ${{ github.repository }}
+      #    readme-filepath: ./docker/kea/README.md
