@@ -21,7 +21,7 @@ jobs:
             type: latest
           - branch: Kea-2.4.0
             type: stable
-                    
+
     permissions:
       packages: write
       contents: read

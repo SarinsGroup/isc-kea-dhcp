@@ -14,6 +14,7 @@ Kea has following services
 
 > Please follow this article that explains how to setup Kea for a [Small Office or Home Use](https://kb.isc.org/docs/kea-configuration-for-small-office-or-home-use)
 
+
 ![ISC Kea Logo](https://gitlab.isc.org/uploads/-/system/project/avatar/26/kea-logo-100x70.png?width=64)
 
 ## Purpose
@@ -39,7 +40,6 @@ Due to image size and vulnerabilities, this is alpine based solution.
 ```
 docker run -d --name dhcp4 -e "KEA_SERVICE=dhcp4" -v "./kea-dhcp4.conf:/etc/kea/kea-dhcp4.conf" sarinsgroup/isc-kea-dhcp:stable
 ```
-
 ### docker-compose.yml
 
 ```docker
@@ -79,7 +79,6 @@ services:
         - ./kea-ctrl-agent.conf:/etc/kea/kea-ctrl-agent.conf
 
 ```
-
 ## Configurations
 
 ### Basic configurations samples can be downloaded from
