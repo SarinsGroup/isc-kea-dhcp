@@ -80,7 +80,7 @@ services:
 
 ```
 
-## Configuraions
+## Configurations
 
 ### Basic configurations samples can be downloaded from
 

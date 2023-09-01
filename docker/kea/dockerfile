@@ -32,7 +32,7 @@ RUN git clone -b ${BRANCH}  https://gitlab.isc.org/isc-projects/kea.git
 WORKDIR /kea
 
 RUN autoreconf --install
-RUN ./configure --with-openssl --with-mysql --with-pgsql --enable-perfdhcp --with-freeradius
+RUN ./configure --with-openssl --with-mysql --with-pgsql --enable-perfdhcp --with-freeradius --with-gssapi
 RUN make
 RUN make install-strip
 
